@@ -21,7 +21,7 @@ import java.util.concurrent.Executor;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-class SmartCommitConnection extends AbstractDelegateWrapper<Connection> implements Connection {
+public class SmartCommitConnection extends AbstractDelegateWrapper<Connection> implements Connection {
   private static final Logger log = Logger.getLogger(SmartCommitConnection.class.getName());
   private boolean autocommit;
 
@@ -47,7 +47,8 @@ class SmartCommitConnection extends AbstractDelegateWrapper<Connection> implemen
     return delegate.nativeSQL(sql);
   }
 
-  boolean getDelegateAutoCommit() throws SQLException {
+  /** Returns true if the underlying connection is currently running in autocommit mode. */
+  public boolean getDelegateAutoCommit() throws SQLException {
     return delegate.getAutoCommit();
   }
 
