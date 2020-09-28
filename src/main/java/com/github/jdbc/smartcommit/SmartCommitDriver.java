@@ -6,7 +6,11 @@ import java.sql.DriverManager;
 import java.sql.DriverPropertyInfo;
 import java.sql.SQLException;
 import java.sql.SQLFeatureNotSupportedException;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
 import java.util.Properties;
+import java.util.ServiceLoader;
 import java.util.logging.Logger;
 
 public class SmartCommitDriver implements Driver {
@@ -14,6 +18,17 @@ public class SmartCommitDriver implements Driver {
   private static final int DRIVER_MAJOR_VERSION = 1;
   private static final int DRIVER_MINOR_VERSION = 0;
   private static final Logger PARENT_LOGGER = Logger.getLogger("com.github.jdbc.smartcommit");
+
+  private static final Map<String, String> WELL_KNOWN_DRIVERS = new HashMap<>();
+
+  static {
+    WELL_KNOWN_DRIVERS.put("jdbc:h2:", "org.h2.Driver");
+    WELL_KNOWN_DRIVERS.put("jdbc:postgresql:", "org.postgresql.Driver");
+    WELL_KNOWN_DRIVERS.put("jdbc:mysql:", "com.mysql.cj.jdbc.Driver");
+    WELL_KNOWN_DRIVERS.put("jdbc:cloudspanner:", "com.google.cloud.spanner.jdbc.JdbcDriver");
+    WELL_KNOWN_DRIVERS.put("jdbc:sqlserver:", "com.microsoft.sqlserver.jdbc.SQLServerDriver");
+    WELL_KNOWN_DRIVERS.put("jdbc:oracle:", "oracle.jdbc.OracleDriver");
+  }
 
   static class DelegateInfo {
     private final Driver driver;
@@ -83,12 +98,43 @@ public class SmartCommitDriver implements Driver {
   private DelegateInfo getDelegateInfo(String url) throws SQLException {
     if (acceptsURL(url)) {
       String delegateUrl = "jdbc:" + url.substring(DRIVER_PREFIX.length());
+      tryRegisterDriver(delegateUrl);
       Driver driver = DriverManager.getDriver(delegateUrl);
       if (driver != null) {
         return new DelegateInfo(driver, delegateUrl);
       }
     }
     return null;
+  }
+
+  private void tryRegisterDriver(String url) throws SQLException {
+    // Iterate over all drivers than can be found and try to dynamically load that driver.
+    Iterator<Driver> iterator = ServiceLoader.load(Driver.class).iterator();
+    while (iterator.hasNext()) {
+      try {
+        Driver driver = iterator.next();
+        if (driver.acceptsURL(url)) {
+          // Driver found.
+          return;
+        }
+      } catch (Throwable t) {
+        // ignore and try the next one.
+      }
+    }
+    // No driver found during dynamic loading. Check if it is a well-known driver.
+    int secondColon = url.indexOf(':', "jdbc:".length());
+    if (secondColon == -1) {
+      return;
+    }
+    String type = url.substring(0, secondColon + 1);
+    try {
+      String className = WELL_KNOWN_DRIVERS.get(type);
+      if (className != null) {
+        Class.forName(className);
+      }
+    } catch (ClassNotFoundException e) {
+      // ignore and let the error propagate to the client application.
+    }
   }
 
   public Connection connect(String url, Properties info) throws SQLException {
@@ -98,7 +144,8 @@ public class SmartCommitDriver implements Driver {
       if (delegateConnection != null) {
         return new SmartCommitConnection(delegateConnection);
       }
-      throw new SQLException(String.format("Could not open a delegate connection for URL %s", delegateInfo.url));
+      throw new SQLException(
+          String.format("Could not open a delegate connection for URL %s", delegateInfo.url));
     }
     return null;
   }
