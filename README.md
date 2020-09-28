@@ -40,7 +40,13 @@ The Smart Commit JDBC Driver is a simple wrapper around any other JDBC driver, s
 
 The `smartcommit:` prefix is added to the JDBC connection URL right after the initial `jdbc:` part, and is then followed by the actual connection URL of your actual JDBC connection URL.
 
-Examples:
+
+## Examples
+
+The below list of examples is not intended to be exhaustive. The Smart Commit JDBC Driver can be used in combination with any JDBC driver.
+
+This driver has no affiliation with any of the example drivers or their vendors named in this document. Any support questions regarding the Smart Commit JDBC Driver should be filed as an issue with this repository, and not with the JDBC driver that is being used in combination with the Smart Commit JDBC driver.
+
 
 ```
 # PostgreSQL
