@@ -4,7 +4,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.github.smartcommit</groupId>
   <artifactId>smartcommit</artifactId>
-  <version>0.0.1-SNAPSHOT</version>
+  <version>1.0</version>
   <name>Smart Commit JDBC Driver</name>
 
   <properties>
@@ -35,7 +35,7 @@
       <scope>test</scope>
     </dependency>
 
-    <!-- Driver dependencies for tests -->
+    <!-- JDBC drivers dependencies for tests -->
     <dependency>
       <groupId>org.postgresql</groupId>
       <artifactId>postgresql</artifactId>
