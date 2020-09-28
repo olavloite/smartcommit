@@ -21,6 +21,17 @@ Smart Commit mode therefore reduces the amount of (read) locks that must be acqu
 
 The Smart Commit JDBC Driver can reduce the number of read locks that are needed for applications that use the Open-Session-In-View (anti-)pattern. Open-Session-In-View (or Open EntityManager in View) is enabled by default in Spring Boot: https://docs.spring.io/spring-boot/docs/2.3.4.RELEASE/reference/html/spring-boot-features.html#boot-features-jpa-in-web-environment
 
+Smart Commit can be used when:
+* Your application does not need a higher isolation level than READ_COMMITTED. READ_COMMITTED is the default isolation in many databases, such as PostgreSQL, Microsoft SQL Server, and Oracle.
+* Your application does need write operations to be executed in transactions.
+
+## What are the Benefits?
+
+* (Web) Applications that execute requests using generic business logic often do not know whether a request in the end will execute any write operations, or if it will only data from the database. Smart Commit ensures that read-only requests are executed in autocommit and will therefore not hold on to any read locks any longer than absolutely necessary.
+* (Web) Applications that execute transactions that execute mainly read operations at the beginning of a transaction and write operations at the end, will require a lot less (read) locks.
+* Transactions are less likely to deadlock and/or to be aborted, as the application will require both less transactions and shorter transactions. This effect is especially noticeable in cloud databases such as Google Cloud Spanner.
+* PostgreSQL specific: If you use PostgreSQL in combination with PgBouncer in [Transaction pooling mode](https://www.pgbouncer.org/features.html), you will be able to achieve a much higher reuse of the backend PostgreSQL connections, as there will be a lot less (long-running) transactions.
+
 ## How Does it Work?
 
 The Smart Commit JDBC Driver is a simple wrapper around any other JDBC driver, so you can use it with any JDBC driver available. The only things that you need to change are:
