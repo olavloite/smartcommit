@@ -32,6 +32,17 @@ Smart Commit can be used when:
 * Transactions are less likely to deadlock and/or to be aborted, as the application will require both less transactions and shorter transactions. This effect is especially noticeable in cloud databases such as Google Cloud Spanner.
 * PostgreSQL specific: If you use PostgreSQL in combination with PgBouncer in [Transaction pooling mode](https://www.pgbouncer.org/features.html), you will be able to achieve a much higher reuse of the backend PostgreSQL connections, as there will be a lot less (long-running) transactions.
 
+## What are the Drawbacks?
+
+* Read operations that are executed before write operations in a transaction, are executed outside of the transaction. That effectively means that those read operations will always have transaction isolation level READ_COMMITTED, regardless of the isolation level that has been set for the JDBC connection.
+
+Note that many relational databases already use READ_COMMITTED as the default isolation level, which means that unless you have specifically chosen a different isolation level, the isolation level of those read operations will still be the same as without the Smart Commit driver. The following databases use READ_COMMITTED by default (at the time of writing):
+* PostgreSQL
+* Microsoft SQL Server
+* Oracle
+
+Note that MySQL uses REPEATABLE_READ its default isolation level.
+
 ## How Does it Work?
 
 The Smart Commit JDBC Driver is a simple wrapper around any other JDBC driver, so you can use it with any JDBC driver available. The only things that you need to change are:
@@ -66,5 +77,8 @@ jdbc:smartcommit:oracle:thin:@myhost:1521:orcl
 
 # Oracle OCI JDBC driver
 jdbc:smartcommit:oracle:oci8:scott/tiger@myhost
+
+# H2
+jdbc:smartcommit:h2:mem:test
 
 ```
