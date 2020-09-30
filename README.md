@@ -4,6 +4,8 @@ Generic JDBC driver wrapper that can be used with most JDBC drivers to implement
 
 When should I use it: If your application uses the Open-Session-In-View (anti-)pattern and you want to reduce the number of read locks required by your application. Especially applications that do a significant large amount of read-only transactions compared to read/write transaction can benefit from this.
 
+See [the samples project](https://github.com/olavloite/smartcommit-samples) for samples on how to use this driver with the database of your choice.
+
 ## What is Smart Commit?
 
 The JDBC standard requires all drivers to implement autocommit and transactional behavior for a connection:
