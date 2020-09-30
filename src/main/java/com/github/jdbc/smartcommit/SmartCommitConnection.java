@@ -1,3 +1,19 @@
+/*
+ * Copyright 2020 Knut Olav Løite
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *       http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.github.jdbc.smartcommit;
 
 import java.sql.Array;
@@ -23,12 +39,16 @@ import java.util.logging.Logger;
 
 public class SmartCommitConnection extends AbstractDelegateWrapper<Connection> implements Connection {
   private static final Logger log = Logger.getLogger(SmartCommitConnection.class.getName());
-  private boolean autocommit;
+  
+  /** Flag for turning on/off smartCommit for the connection. This is enabled by default, but will only have effect as long as autoCommit=false for this connection. */
+  private boolean smartCommit = true;
+  
+  /** Flag for turning on/off autoCommit for the connection. Setting autoCommit=true will automatically cause the smartCommit setting to have no effect until autoCommit is switched back off. */
+  private boolean autoCommit;
 
   SmartCommitConnection(Connection delegate) throws SQLException {
     super(delegate);
-    this.autocommit = delegate.getAutoCommit();
-    this.delegate.setAutoCommit(true);
+    this.autoCommit = delegate.getAutoCommit();
   }
 
   public Statement createStatement() throws SQLException {
@@ -57,15 +77,54 @@ public class SmartCommitConnection extends AbstractDelegateWrapper<Connection> i
   }
 
   public void setAutoCommit(boolean autoCommit) throws SQLException {
-    this.autocommit = autoCommit;
+    if (this.autoCommit == autoCommit) {
+      // no change needed.
+      return;
+    }
+    
+    if (autoCommit) {
+      // Turning on autoCommit.
+      // First try to change the underlying connection.
+      delegate.setAutoCommit(true);
+      this.autoCommit = true;
+    } else {
+      // Turning off autoCommit.
+      // Set the underlying connection based on the smartCommit setting.
+      delegate.setAutoCommit(this.smartCommit);
+      this.autoCommit = false;
+    }
   }
 
   public boolean getAutoCommit() throws SQLException {
-    return autocommit;
+    return autoCommit;
+  }
+  
+  public void setSmartCommit(boolean smartCommit) throws SQLException {
+    if (this.smartCommit == smartCommit) {
+      return;
+    }
+    
+    if (smartCommit) {
+      delegate.setAutoCommit(true);
+      this.smartCommit = true;
+    } else {
+      if (!autoCommit && delegate.getAutoCommit()) {
+        delegate.setAutoCommit(false);
+      }
+      this.smartCommit = false;
+    }
+  }
+  
+  public boolean getSmartCommit() {
+    return smartCommit;
   }
 
   public void commit() throws SQLException {
-    if (autocommit) {
+    if (!smartCommit) {
+      delegate.commit();
+      return;
+    }
+    if (autoCommit) {
       throw new SQLException("Cannot commit when in autocommit");
     }
     if (delegate.getAutoCommit()) {
@@ -78,7 +137,11 @@ public class SmartCommitConnection extends AbstractDelegateWrapper<Connection> i
   }
 
   public void rollback() throws SQLException {
-    if (autocommit) {
+    if (!smartCommit) {
+      delegate.rollback();
+      return;
+    }
+    if (autoCommit) {
       throw new SQLException("Cannot rollback when in autocommit");
     }
     if (delegate.getAutoCommit()) {
@@ -169,7 +232,7 @@ public class SmartCommitConnection extends AbstractDelegateWrapper<Connection> i
   }
 
   public Savepoint setSavepoint() throws SQLException {
-    if (autocommit) {
+    if (autoCommit) {
       throw new SQLException("Cannot set savepoint when in autocommit");
     }
     if (getDelegateAutoCommit()) {
@@ -179,7 +242,7 @@ public class SmartCommitConnection extends AbstractDelegateWrapper<Connection> i
   }
 
   public Savepoint setSavepoint(String name) throws SQLException {
-    if (autocommit) {
+    if (autoCommit) {
       throw new SQLException("Cannot set savepoint when in autocommit");
     }
     if (getDelegateAutoCommit()) {
@@ -189,7 +252,7 @@ public class SmartCommitConnection extends AbstractDelegateWrapper<Connection> i
   }
 
   public void rollback(Savepoint savepoint) throws SQLException {
-    if (autocommit) {
+    if (autoCommit) {
       throw new SQLException("Cannot rollback savepoint when in autocommit");
     }
     if (delegate.getAutoCommit()) {

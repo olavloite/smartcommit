@@ -22,6 +22,7 @@ import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 
+/** This parser is based on the statement parser in the Google Cloud Spanner JDBC driver. */
 class StatementParser {
   /** Singleton instance of {@link StatementParser}. */
   public static final StatementParser INSTANCE = new StatementParser();
@@ -125,7 +126,7 @@ class StatementParser {
   private static final Set<String> selectStatements =
       new HashSet<>(Arrays.asList("SELECT", "WITH"));
   private static final Set<String> dmlStatements =
-      new HashSet<>(Arrays.asList("INSERT", "UPDATE", "DELETE"));
+      new HashSet<>(Arrays.asList("INSERT", "UPDATE", "DELETE", "MERGE", "TRUNCATE", "SELECT INTO"));
 
   /** Private constructor for singleton instance. */
   private StatementParser() {}
@@ -177,7 +178,8 @@ class StatementParser {
     if (sql.startsWith("@")) {
       sql = removeStatementHint(sql);
     }
-    return statementStartsWith(sql, selectStatements);
+    // Check explicitly that it does not start with a DML statement to detect 'SELECT INTO' statements.
+    return statementStartsWith(sql, selectStatements) && !statementStartsWith(sql, dmlStatements);
   }
 
   /**
@@ -206,16 +208,18 @@ class StatementParser {
   }
 
   /**
-   * Removes comments from and trims the given sql statement. Spanner supports three types of
-   * comments:
+   * Changes from original:
+   * <ul>
+   *   <li>Removed specific Spanner references
+   * </ul>
+   * 
+   * Removes comments from and trims the given sql statement. This parser removes the following types of comments:
    *
    * <ul>
    *   <li>Single line comments starting with '--'
    *   <li>Single line comments starting with '#'
    *   <li>Multi line comments between '/&#42;' and '&#42;/'
    * </ul>
-   *
-   * Reference: https://cloud.google.com/spanner/docs/lexical#comments
    *
    * @param sql The sql statement to remove comments from and to trim.
    * @return the sql statement without the comments and leading and trailing spaces.
@@ -347,9 +351,10 @@ class StatementParser {
     return sql;
   }
 
-  static boolean isDml(String sql) {
+  static boolean isUpdateOrDdl(String sql) {
     try {
-      return INSTANCE.parse(sql).isUpdate();
+      ParsedStatement statement = INSTANCE.parse(sql);
+      return statement.isUpdate() || statement.isDdl();
     } catch (Throwable t) {
       return false;
     }
