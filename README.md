@@ -6,6 +6,27 @@ When should I use it: If your application uses the Open-Session-In-View (anti-)p
 
 See [the samples project](https://github.com/olavloite/smartcommit-samples) for samples on how to use this driver with the database of your choice.
 
+## Usage
+
+Add the following dependency to your project:
+
+```xml
+<dependency>
+  <groupId>com.github.olavloite</groupId>
+  <artifactId>smartcommit-jdbc</artifactId>
+  <version>1.0</version>
+</dependency>
+```
+
+Adjust your JDBC connection URL and driver class name to use the Smart Commit driver as a wrapper around your underlying database. The following example is for a PostgreSQL database:
+
+```
+url=jdbc:smartcommit:postgresql://localhost/my-database
+driver-class-name=com.github.jdbc.smartcommit.SmartCommitDriver
+```
+
+See the [Smart Commit JDBC Driver Samples](https://github.com/olavloite/smartcommit-samples) for more examples on how to use this driver.
+
 ## What is Smart Commit?
 
 The JDBC standard requires all drivers to implement autocommit and transactional behavior for a connection:
