@@ -1,17 +1,15 @@
 /*
  * Copyright 2020 Knut Olav Løite
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License. You may obtain a copy of the License at
  *
- *       http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Unless required by applicable law or agreed to in writing, software distributed under the License
+ * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ * or implied. See the License for the specific language governing permissions and limitations under
+ * the License.
  */
 
 package com.github.jdbc.smartcommit;
@@ -508,16 +506,14 @@ class SmartCommitDatabaseMetaData extends AbstractDelegateWrapper<DatabaseMetaDa
     return delegate.getProcedures(catalog, schemaPattern, procedureNamePattern);
   }
 
-  public ResultSet getProcedureColumns(
-      String catalog, String schemaPattern, String procedureNamePattern, String columnNamePattern)
-      throws SQLException {
-    return delegate.getProcedureColumns(
-        catalog, schemaPattern, procedureNamePattern, columnNamePattern);
+  public ResultSet getProcedureColumns(String catalog, String schemaPattern,
+      String procedureNamePattern, String columnNamePattern) throws SQLException {
+    return delegate.getProcedureColumns(catalog, schemaPattern, procedureNamePattern,
+        columnNamePattern);
   }
 
-  public ResultSet getTables(
-      String catalog, String schemaPattern, String tableNamePattern, String[] types)
-      throws SQLException {
+  public ResultSet getTables(String catalog, String schemaPattern, String tableNamePattern,
+      String[] types) throws SQLException {
     return delegate.getTables(catalog, schemaPattern, tableNamePattern, types);
   }
 
@@ -533,14 +529,13 @@ class SmartCommitDatabaseMetaData extends AbstractDelegateWrapper<DatabaseMetaDa
     return delegate.getTableTypes();
   }
 
-  public ResultSet getColumns(
-      String catalog, String schemaPattern, String tableNamePattern, String columnNamePattern)
-      throws SQLException {
+  public ResultSet getColumns(String catalog, String schemaPattern, String tableNamePattern,
+      String columnNamePattern) throws SQLException {
     return delegate.getColumns(catalog, schemaPattern, tableNamePattern, columnNamePattern);
   }
 
-  public ResultSet getColumnPrivileges(
-      String catalog, String schema, String table, String columnNamePattern) throws SQLException {
+  public ResultSet getColumnPrivileges(String catalog, String schema, String table,
+      String columnNamePattern) throws SQLException {
     return delegate.getColumnPrivileges(catalog, schema, table, columnNamePattern);
   }
 
@@ -549,9 +544,8 @@ class SmartCommitDatabaseMetaData extends AbstractDelegateWrapper<DatabaseMetaDa
     return delegate.getTablePrivileges(catalog, schemaPattern, tableNamePattern);
   }
 
-  public ResultSet getBestRowIdentifier(
-      String catalog, String schema, String table, int scope, boolean nullable)
-      throws SQLException {
+  public ResultSet getBestRowIdentifier(String catalog, String schema, String table, int scope,
+      boolean nullable) throws SQLException {
     return delegate.getBestRowIdentifier(catalog, schema, table, scope, nullable);
   }
 
@@ -574,25 +568,18 @@ class SmartCommitDatabaseMetaData extends AbstractDelegateWrapper<DatabaseMetaDa
     return delegate.getExportedKeys(catalog, schema, table);
   }
 
-  public ResultSet getCrossReference(
-      String parentCatalog,
-      String parentSchema,
-      String parentTable,
-      String foreignCatalog,
-      String foreignSchema,
-      String foreignTable)
-      throws SQLException {
-    return delegate.getCrossReference(
-        parentCatalog, parentSchema, parentTable, foreignCatalog, foreignSchema, foreignTable);
+  public ResultSet getCrossReference(String parentCatalog, String parentSchema, String parentTable,
+      String foreignCatalog, String foreignSchema, String foreignTable) throws SQLException {
+    return delegate.getCrossReference(parentCatalog, parentSchema, parentTable, foreignCatalog,
+        foreignSchema, foreignTable);
   }
 
   public ResultSet getTypeInfo() throws SQLException {
     return delegate.getTypeInfo();
   }
 
-  public ResultSet getIndexInfo(
-      String catalog, String schema, String table, boolean unique, boolean approximate)
-      throws SQLException {
+  public ResultSet getIndexInfo(String catalog, String schema, String table, boolean unique,
+      boolean approximate) throws SQLException {
     return delegate.getIndexInfo(catalog, schema, table, unique, approximate);
   }
 
@@ -644,9 +631,8 @@ class SmartCommitDatabaseMetaData extends AbstractDelegateWrapper<DatabaseMetaDa
     return delegate.supportsBatchUpdates();
   }
 
-  public ResultSet getUDTs(
-      String catalog, String schemaPattern, String typeNamePattern, int[] types)
-      throws SQLException {
+  public ResultSet getUDTs(String catalog, String schemaPattern, String typeNamePattern,
+      int[] types) throws SQLException {
     return delegate.getUDTs(catalog, schemaPattern, typeNamePattern, types);
   }
 
@@ -680,9 +666,8 @@ class SmartCommitDatabaseMetaData extends AbstractDelegateWrapper<DatabaseMetaDa
     return delegate.getSuperTables(catalog, schemaPattern, tableNamePattern);
   }
 
-  public ResultSet getAttributes(
-      String catalog, String schemaPattern, String typeNamePattern, String attributeNamePattern)
-      throws SQLException {
+  public ResultSet getAttributes(String catalog, String schemaPattern, String typeNamePattern,
+      String attributeNamePattern) throws SQLException {
     return delegate.getAttributes(catalog, schemaPattern, typeNamePattern, attributeNamePattern);
   }
 
@@ -747,16 +732,14 @@ class SmartCommitDatabaseMetaData extends AbstractDelegateWrapper<DatabaseMetaDa
     return delegate.getFunctions(catalog, schemaPattern, functionNamePattern);
   }
 
-  public ResultSet getFunctionColumns(
-      String catalog, String schemaPattern, String functionNamePattern, String columnNamePattern)
-      throws SQLException {
-    return delegate.getFunctionColumns(
-        catalog, schemaPattern, functionNamePattern, columnNamePattern);
+  public ResultSet getFunctionColumns(String catalog, String schemaPattern,
+      String functionNamePattern, String columnNamePattern) throws SQLException {
+    return delegate.getFunctionColumns(catalog, schemaPattern, functionNamePattern,
+        columnNamePattern);
   }
 
-  public ResultSet getPseudoColumns(
-      String catalog, String schemaPattern, String tableNamePattern, String columnNamePattern)
-      throws SQLException {
+  public ResultSet getPseudoColumns(String catalog, String schemaPattern, String tableNamePattern,
+      String columnNamePattern) throws SQLException {
     return delegate.getPseudoColumns(catalog, schemaPattern, tableNamePattern, columnNamePattern);
   }
 

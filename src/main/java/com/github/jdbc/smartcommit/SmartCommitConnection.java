@@ -1,17 +1,15 @@
 /*
  * Copyright 2020 Knut Olav Løite
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License. You may obtain a copy of the License at
  *
- *       http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Unless required by applicable law or agreed to in writing, software distributed under the License
+ * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ * or implied. See the License for the specific language governing permissions and limitations under
+ * the License.
  */
 
 package com.github.jdbc.smartcommit;
@@ -37,18 +35,41 @@ import java.util.concurrent.Executor;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class SmartCommitConnection extends AbstractDelegateWrapper<Connection> implements Connection {
+public class SmartCommitConnection extends AbstractDelegateWrapper<Connection>
+    implements Connection {
   private static final Logger log = Logger.getLogger(SmartCommitConnection.class.getName());
-  
-  /** Flag for turning on/off smartCommit for the connection. This is enabled by default, but will only have effect as long as autoCommit=false for this connection. */
+
+  /**
+   * Flag for turning on/off smartCommit for the connection. This is enabled by default, but will
+   * only have effect as long as autoCommit=false for this connection.
+   */
   private boolean smartCommit = true;
-  
-  /** Flag for turning on/off autoCommit for the connection. Setting autoCommit=true will automatically cause the smartCommit setting to have no effect until autoCommit is switched back off. */
+
+  /**
+   * Flag for turning on/off autoCommit for the connection. Setting autoCommit=true will
+   * automatically cause the smartCommit setting to have no effect until autoCommit is switched back
+   * off.
+   */
   private boolean autoCommit;
 
   SmartCommitConnection(Connection delegate) throws SQLException {
     super(delegate);
     this.autoCommit = delegate.getAutoCommit();
+  }
+
+  /**
+   * Forces the begin of a transaction when smartCommit=true and no transaction is yet active. This
+   * method should be called when the application requires a transaction to be started before any
+   * write operations have been executed, for example if the application intends to take explicit
+   * locks.
+   */
+  public void ensureTransaction() throws SQLException {
+    if (smartCommit && !autoCommit) {
+      setDelegateAutoCommit(false);
+    } else {
+      throw new SQLException(
+          "beginTransaction can only be called when smartCommit=true and autoCommit=false");
+    }
   }
 
   public Statement createStatement() throws SQLException {
@@ -81,7 +102,7 @@ public class SmartCommitConnection extends AbstractDelegateWrapper<Connection> i
       // no change needed.
       return;
     }
-    
+
     if (autoCommit) {
       // Turning on autoCommit.
       // First try to change the underlying connection.
@@ -98,12 +119,12 @@ public class SmartCommitConnection extends AbstractDelegateWrapper<Connection> i
   public boolean getAutoCommit() throws SQLException {
     return autoCommit;
   }
-  
+
   public void setSmartCommit(boolean smartCommit) throws SQLException {
     if (this.smartCommit == smartCommit) {
       return;
     }
-    
+
     if (smartCommit) {
       delegate.setAutoCommit(true);
       this.smartCommit = true;
@@ -114,7 +135,7 @@ public class SmartCommitConnection extends AbstractDelegateWrapper<Connection> i
       this.smartCommit = false;
     }
   }
-  
+
   public boolean getSmartCommit() {
     return smartCommit;
   }
@@ -199,20 +220,20 @@ public class SmartCommitConnection extends AbstractDelegateWrapper<Connection> i
 
   public Statement createStatement(int resultSetType, int resultSetConcurrency)
       throws SQLException {
-    return new SmartCommitStatement<>(
-        this, delegate.createStatement(resultSetType, resultSetConcurrency));
+    return new SmartCommitStatement<>(this,
+        delegate.createStatement(resultSetType, resultSetConcurrency));
   }
 
   public PreparedStatement prepareStatement(String sql, int resultSetType, int resultSetConcurrency)
       throws SQLException {
-    return new SmartCommitPreparedStatement<>(
-        this, delegate.prepareStatement(sql, resultSetType, resultSetConcurrency), sql);
+    return new SmartCommitPreparedStatement<>(this,
+        delegate.prepareStatement(sql, resultSetType, resultSetConcurrency), sql);
   }
 
   public CallableStatement prepareCall(String sql, int resultSetType, int resultSetConcurrency)
       throws SQLException {
-    return new SmartCommitCallableStatement<>(
-        this, delegate.prepareCall(sql, resultSetType, resultSetConcurrency), sql);
+    return new SmartCommitCallableStatement<>(this,
+        delegate.prepareCall(sql, resultSetType, resultSetConcurrency), sql);
   }
 
   public Map<String, Class<?>> getTypeMap() throws SQLException {
@@ -272,43 +293,38 @@ public class SmartCommitConnection extends AbstractDelegateWrapper<Connection> i
     }
   }
 
-  public Statement createStatement(
-      int resultSetType, int resultSetConcurrency, int resultSetHoldability) throws SQLException {
-    return new SmartCommitStatement<>(
-        this, delegate.createStatement(resultSetType, resultSetConcurrency, resultSetHoldability));
+  public Statement createStatement(int resultSetType, int resultSetConcurrency,
+      int resultSetHoldability) throws SQLException {
+    return new SmartCommitStatement<>(this,
+        delegate.createStatement(resultSetType, resultSetConcurrency, resultSetHoldability));
   }
 
-  public PreparedStatement prepareStatement(
-      String sql, int resultSetType, int resultSetConcurrency, int resultSetHoldability)
-      throws SQLException {
-    return new SmartCommitPreparedStatement<>(
-        this,
+  public PreparedStatement prepareStatement(String sql, int resultSetType, int resultSetConcurrency,
+      int resultSetHoldability) throws SQLException {
+    return new SmartCommitPreparedStatement<>(this,
         delegate.prepareStatement(sql, resultSetType, resultSetConcurrency, resultSetHoldability),
         sql);
   }
 
-  public CallableStatement prepareCall(
-      String sql, int resultSetType, int resultSetConcurrency, int resultSetHoldability)
-      throws SQLException {
-    return new SmartCommitCallableStatement<>(
-        this,
-        delegate.prepareCall(sql, resultSetType, resultSetConcurrency, resultSetHoldability),
-        sql);
+  public CallableStatement prepareCall(String sql, int resultSetType, int resultSetConcurrency,
+      int resultSetHoldability) throws SQLException {
+    return new SmartCommitCallableStatement<>(this,
+        delegate.prepareCall(sql, resultSetType, resultSetConcurrency, resultSetHoldability), sql);
   }
 
   public PreparedStatement prepareStatement(String sql, int autoGeneratedKeys) throws SQLException {
-    return new SmartCommitPreparedStatement<>(
-        this, delegate.prepareStatement(sql, autoGeneratedKeys), sql);
+    return new SmartCommitPreparedStatement<>(this,
+        delegate.prepareStatement(sql, autoGeneratedKeys), sql);
   }
 
   public PreparedStatement prepareStatement(String sql, int[] columnIndexes) throws SQLException {
-    return new SmartCommitPreparedStatement<>(
-        this, delegate.prepareStatement(sql, columnIndexes), sql);
+    return new SmartCommitPreparedStatement<>(this, delegate.prepareStatement(sql, columnIndexes),
+        sql);
   }
 
   public PreparedStatement prepareStatement(String sql, String[] columnNames) throws SQLException {
-    return new SmartCommitPreparedStatement<>(
-        this, delegate.prepareStatement(sql, columnNames), sql);
+    return new SmartCommitPreparedStatement<>(this, delegate.prepareStatement(sql, columnNames),
+        sql);
   }
 
   public Clob createClob() throws SQLException {

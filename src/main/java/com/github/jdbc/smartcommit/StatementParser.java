@@ -1,17 +1,15 @@
 /*
  * Copyright 2019 Google LLC
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License. You may obtain a copy of the License at
  *
- *       http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Unless required by applicable law or agreed to in writing, software distributed under the License
+ * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ * or implied. See the License for the specific language governing permissions and limitations under
+ * the License.
  */
 
 package com.github.jdbc.smartcommit;
@@ -29,10 +27,7 @@ class StatementParser {
 
   /** The type of statement that has been recognized by the parser. */
   enum StatementType {
-    DDL,
-    QUERY,
-    UPDATE,
-    UNKNOWN;
+    DDL, QUERY, UPDATE, UNKNOWN;
   }
 
   /** A statement that has been parsed */
@@ -125,8 +120,8 @@ class StatementParser {
       new HashSet<>(Arrays.asList("CREATE", "DROP", "ALTER"));
   private static final Set<String> selectStatements =
       new HashSet<>(Arrays.asList("SELECT", "WITH"));
-  private static final Set<String> dmlStatements =
-      new HashSet<>(Arrays.asList("INSERT", "UPDATE", "DELETE", "MERGE", "TRUNCATE", "SELECT INTO"));
+  private static final Set<String> dmlStatements = new HashSet<>(
+      Arrays.asList("INSERT", "UPDATE", "DELETE", "MERGE", "TRUNCATE", "SELECT INTO"));
 
   /** Private constructor for singleton instance. */
   private StatementParser() {}
@@ -158,7 +153,7 @@ class StatementParser {
    *
    * @param sql The statement to check (without any comments).
    * @return <code>true</code> if the statement is a DDL statement (i.e. starts with 'CREATE',
-   *     'ALTER' or 'DROP').
+   *         'ALTER' or 'DROP').
    */
   public boolean isDdlStatement(String sql) {
     return statementStartsWith(sql, ddlStatements);
@@ -178,7 +173,8 @@ class StatementParser {
     if (sql.startsWith("@")) {
       sql = removeStatementHint(sql);
     }
-    // Check explicitly that it does not start with a DML statement to detect 'SELECT INTO' statements.
+    // Check explicitly that it does not start with a DML statement to detect 'SELECT INTO'
+    // statements.
     return statementStartsWith(sql, selectStatements) && !statementStartsWith(sql, dmlStatements);
   }
 
@@ -189,7 +185,7 @@ class StatementParser {
    *
    * @param sql The statement to check (without any comments).
    * @return <code>true</code> if the statement is a DML update statement (i.e. starts with
-   *     'INSERT', 'UPDATE' or 'DELETE').
+   *         'INSERT', 'UPDATE' or 'DELETE').
    */
   public boolean isUpdateStatement(String sql) {
     return statementStartsWith(sql, dmlStatements);
@@ -210,15 +206,16 @@ class StatementParser {
   /**
    * Changes from original:
    * <ul>
-   *   <li>Removed specific Spanner references
+   * <li>Removed specific Spanner references
    * </ul>
    * 
-   * Removes comments from and trims the given sql statement. This parser removes the following types of comments:
+   * Removes comments from and trims the given sql statement. This parser removes the following
+   * types of comments:
    *
    * <ul>
-   *   <li>Single line comments starting with '--'
-   *   <li>Single line comments starting with '#'
-   *   <li>Multi line comments between '/&#42;' and '&#42;/'
+   * <li>Single line comments starting with '--'
+   * <li>Single line comments starting with '#'
+   * <li>Multi line comments between '/&#42;' and '&#42;/'
    * </ul>
    *
    * @param sql The sql statement to remove comments from and to trim.
@@ -249,8 +246,7 @@ class StatementParser {
           if (lastCharWasEscapeChar) {
             lastCharWasEscapeChar = false;
           } else if (isTripleQuoted) {
-            if (sql.length() > index + 2
-                && sql.charAt(index + 1) == startQuote
+            if (sql.length() > index + 2 && sql.charAt(index + 1) == startQuote
                 && sql.charAt(index + 2) == startQuote) {
               isInQuoted = false;
               startQuote = 0;
@@ -294,8 +290,7 @@ class StatementParser {
               isInQuoted = true;
               startQuote = c;
               // Check whether it is a triple-quote.
-              if (sql.length() > index + 2
-                  && sql.charAt(index + 1) == startQuote
+              if (sql.length() > index + 2 && sql.charAt(index + 1) == startQuote
                   && sql.charAt(index + 2) == startQuote) {
                 isTripleQuoted = true;
                 res.append(c).append(c);
@@ -336,7 +331,8 @@ class StatementParser {
     String upperCaseSql = sql.toUpperCase();
     for (String keyword : selectStatements) {
       startQueryIndex = upperCaseSql.indexOf(keyword);
-      if (startQueryIndex > -1) break;
+      if (startQueryIndex > -1)
+        break;
     }
     if (startQueryIndex > -1) {
       int endStatementHintIndex = sql.substring(0, startQueryIndex).lastIndexOf('}');
