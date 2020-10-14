@@ -25,6 +25,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Properties;
 import java.util.ServiceLoader;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Logger;
 
 public class SmartCommitDriver implements Driver {
@@ -54,6 +55,8 @@ public class SmartCommitDriver implements Driver {
     }
   }
 
+  private static final AtomicReference<SmartCommitDriver> registeredDriver = new AtomicReference<>();
+
   static {
     try {
       register();
@@ -62,16 +65,11 @@ public class SmartCommitDriver implements Driver {
     }
   }
 
-  private static SmartCommitDriver registeredDriver;
-
   static void register() throws SQLException {
-    if (isRegistered()) {
-      throw new IllegalStateException(
-          "Driver is already registered. It can only be registered once.");
+    SmartCommitDriver driver = new SmartCommitDriver();
+    if (registeredDriver.compareAndSet(null, driver)) {
+      DriverManager.registerDriver(driver);
     }
-    SmartCommitDriver registeredDriver = new SmartCommitDriver();
-    DriverManager.registerDriver(registeredDriver);
-    SmartCommitDriver.registeredDriver = registeredDriver;
   }
 
   /**
@@ -79,32 +77,10 @@ public class SmartCommitDriver implements Driver {
    * the class is loaded. To avoid leaks, this method allow unregistering the driver so that the
    * class can be gc'ed if necessary.
    *
-   * @throws IllegalStateException if the driver is not registered
    * @throws SQLException if deregistering the driver fails
    */
   static void deregister() throws SQLException {
-    if (!isRegistered()) {
-      throw new IllegalStateException(
-          "Driver is not registered (or it has not been registered using Driver.register() method)");
-    }
-    DriverManager.deregisterDriver(registeredDriver);
-    registeredDriver = null;
-  }
-
-  /** @return {@code true} if the driver is registered against {@link DriverManager} */
-  static boolean isRegistered() {
-    return registeredDriver != null;
-  }
-
-  /**
-   * @return the registered JDBC driver for Cloud Spanner.
-   * @throws SQLException if the driver has not been registered.
-   */
-  static SmartCommitDriver getRegisteredDriver() throws SQLException {
-    if (isRegistered()) {
-      return registeredDriver;
-    }
-    throw new SQLException("The driver has not been registered");
+    DriverManager.deregisterDriver(registeredDriver.getAndSet(null));
   }
 
   public SmartCommitDriver() {}
